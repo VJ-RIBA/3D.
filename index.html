@@ -1,38 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
-  <title>STAGE 3D</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <style>
-    body{
-      margin:0;
-      background:#0a0a0a;
-      color:#fff;
-      font-family:Arial, Helvetica, sans-serif;
-      display:flex;
-      flex-direction:column;
-      height:100vh;
-    }
-    header{
-      padding:12px;
-      text-align:center;
-      font-size:22px;
-      font-weight:bold;
-      background:#111;
-      border-bottom:1px solid #222;
-    }
-    model-viewer{
-      flex:1;
-      width:100%;
-      height:100%;
-      background:#000;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <title>Visualizador 3D</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; }
+        canvas { display: block; }
+    </style>
 </head>
 <body>
-  <header>STAGE 3D</header>
-  <model-viewer src="model.glb" camera-controls auto-rotate></model-viewer>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/loaders/GLTFLoader.js"></script>
+
+<script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    // Luz ambiente suave
+    const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambient);
+
+    // Luz neon verde global
+    const neon = new THREE.PointLight(0x00ff99, 4, 25);
+    neon.position.set(0, 4, 4);
+    scene.add(neon);
+
+    const loader = new THREE.GLTFLoader();
+
+    // Caminho RAW correto do GitHub
+    const url = "https://raw.githubusercontent.com/VJ-RIBA/3D./main/model.glb";
+
+    loader.load(url, (gltf) => {
+        const model = gltf.scene;
+        scene.add(model);
+
+        // Ativa emissive apenas nos objetos "moving"
+        model.traverse((obj) => {
+            if (obj.isMesh && obj.material) {
+                if (obj.name.toLowerCase().includes("moving")) {
+
+                    obj.material.emissive = new THREE.Color(0x00ff99);
+                    obj.material.emissiveIntensity = 4;
+
+                    if (obj.material.map) obj.material.emissiveMap = obj.material.map;
+
+                    obj.material.needsUpdate = true;
+                }
+            }
+        });
+
+        animate();
+    }, undefined, (error) => {
+        console.error("Erro ao carregar o GLB:", error);
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+
 </body>
 </html>
