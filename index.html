@@ -30,16 +30,17 @@ document.body.appendChild(renderer.domElement);
 
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
+// luz principal
 const light = new THREE.PointLight(0xffffff, 2, 10);
 light.position.set(2,2,2);
 scene.add(light);
 
-// Luz piscando
+// piscar
 setInterval(()=>{ light.intensity = light.intensity === 2 ? 0.2 : 2; }, 500);
 
-// Carregar GLB (CORRIGIDO)
+// carregar modelo
 const loader = new THREE.GLTFLoader();
-loader.load("https://vj-riba.github.io/3D/model.glb", gltf=>{
+loader.load("https://raw.githubusercontent.com/VJ-RIBA/3D./main/model.glb", gltf=>{
     const model = gltf.scene;
     scene.add(model);
 
@@ -53,10 +54,7 @@ loader.load("https://vj-riba.github.io/3D/model.glb", gltf=>{
     } else {
         renderer.setAnimationLoop(()=>renderer.render(scene,camera));
     }
-},
-undefined,
-error => console.error("ERRO AO CARREGAR O GLB:", error)
-);
+});
 
 window.addEventListener("resize", ()=>{
     camera.aspect = window.innerWidth/window.innerHeight;
@@ -64,6 +62,5 @@ window.addEventListener("resize", ()=>{
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 </script>
-
 </body>
 </html>
