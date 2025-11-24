@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>STAGE 3D</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body{
+      margin:0;
+      background:#0a0a0a;
+      color:#fff;
+      font-family:Arial, Helvetica, sans-serif;
+      display:flex;
+      flex-direction:column;
+      height:100vh;
+    }
+    header{
+      padding:12px;
+      text-align:center;
+      font-size:22px;
+      font-weight:bold;
+      background:#111;
+      border-bottom:1px solid #222;
+    }
+    model-viewer{
+      flex:1;
+      width:100%;
+      height:100%;
+      background:#000;
+    }
+  </style>
+</head>
+<body>
+  <header>STAGE 3D</header>
+  <model-viewer src="model.glb" camera-controls auto-rotate></model-viewer>
+</body>
+</html>
