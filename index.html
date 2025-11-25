@@ -1,75 +1,71 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<title>Visualize Aqui Seu Projeto 3D</title>
+<title>3D Viewer</title>
 <style>
-  body { margin: 0; background: #000; overflow: hidden; }
-  #info {
-    position: fixed; top: 10px; width: 100%; text-align: center;
-    color: #0f0; font-family: Arial; font-size: 18px;
-    text-shadow: 0 0 10px #0f0;
+  body { margin: 0; overflow: hidden; background: #000; }
+  #instructions {
+    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    color: #0f0; font-family: Arial; font-size: 16px; text-align: center;
+    background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px;
   }
 </style>
 </head>
 <body>
-<div id="info">
-  Use um dedo para girar • Dois dedos para zoom • Três dedos para mover
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/loaders/GLTFLoader.js"></script>
+
+<div id="instructions">Use um dedo para girar • Dois dedos para zoom • Luz do moving acendendo</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 500);
-  camera.position.set(0, 1.5, 4);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(1, 1.5, 4);
 
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-  const light1 = new THREE.PointLight(0xffffff, 4, 20);
-  light1.position.set(2, 3, 2);
-  scene.add(light1);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-  const light2 = new THREE.PointLight(0xffffff, 4, 20);
-  light2.position.set(-2, 3, -2);
-  scene.add(light2);
+// LUZ PRINCIPAL
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  let mixer;
-  const loader = new THREE.GLTFLoader();
-  loader.load("model.glb", gltf => {
+// Luz dinâmica do moving
+const movingLight = new THREE.PointLight(0x00aaff, 4, 10);
+movingLight.position.set(0, 2, 0);
+scene.add(movingLight);
+
+// Efeito de piscar
+setInterval(() => {
+    movingLight.intensity = movingLight.intensity === 4 ? 0.2 : 4;
+}, 300);
+
+// Carregar GLB
+const loader = new THREE.GLTFLoader();
+loader.load("model.glb", gltf => {
+
     const model = gltf.scene;
     scene.add(model);
 
-    mixer = new THREE.AnimationMixer(model);
+    // ENCONTRAR O OBJETO EXATO
+    const moving = model.getObjectByName("Blue Moving Head Tilt");
 
-    const action = mixer.clipAction(gltf.animations[0]);
-    action.play();
-  });
+    renderer.setAnimationLoop(() => {
 
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // Rotação independente
+        if (moving) {
+            moving.rotation.y += 0.02;      // PAN
+            moving.rotation.x = Math.sin(Date.now() * 0.002) * 0.6; // TILT oscilante
+        }
 
-  function animate() {
-    requestAnimationFrame(animate);
-    if(mixer) mixer.update(0.01);
-
-    light1.position.x = Math.sin(Date.now()*0.002)*3;
-    light2.position.z = Math.cos(Date.now()*0.0015)*3;
-
-    renderer.render(scene, camera);
-  }
-  animate();
-
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+        renderer.render(scene, camera);
+    });
+});
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
 </body>
 </html>
